@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Philippine Solar Calculator</title>
+    <style>
+        :root {
+            --primary: #f59e0b;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --eco: #16a34a;
+            --muted: #64748b;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center; /* Centers vertically if screen is tall enough */
+            min-height: 100vh;
+            padding: 1rem;
+            margin: 0;
+            box-sizing: border-box;
+        }
+        .calculator-container {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            max-width: 1000px; /* Widened for two columns */
+            width: 100%;
+        }
+        h2 {
+            text-align: center;
+            color: var(--primary);
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+        }
+        
+        /* NEW: Grid Layout for Side-by-Side */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2.5rem;
+        }
+
+        h3 {
+            font-size: 1.1rem;
+            color: var(--text);
+            margin-top: 0;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 0.5rem;
+        }
+        .eco-title {
+            color: var(--eco);
+            border-bottom: 2px solid #bbf7d0;
+            margin-top: 1.5rem;
+        }
+        .input-group {
+            margin-bottom: 1rem; /* Tightened spacing */
+        }
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+            font-size: 0.9rem;
+        }
+        input[type="number"], input[type="text"], input[type="range"] {
+            width: 100%;
+            padding: 0.6rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 1rem;
+            background-color: #fff;
+            color: var(--text);
+        }
+        input[type="number"]:focus, input[type="text"]:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2);
+        }
+        .slider-value {
+            float: right;
+            color: var(--primary);
+            font-weight: bold;
+        }
+        .results {
+            background: var(--bg);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            height: 100%;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+        }
+        .hero-result {
+            text-align: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+        }
+        .hero-result .label {
+            display: block;
+            color: var(--muted);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+        .hero-result .value {
+            font-size: 2.2rem;
+            color: var(--primary);
+            font-weight: bold;
+            line-height: 1;
+        }
+        .hero-result .sub-value {
+            display: block;
+            color: var(--muted);
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+        }
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.8rem;
+            padding-bottom: 0.4rem;
+            border-bottom: 1px dashed var(--border);
+            align-items: center;
+            font-size: 0.95rem;
+        }
+        .result-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        .result-value {
+            font-weight: bold;
+            color: var(--text);
+            font-size: 1.05rem;
+            text-align: right;
+        }
+        .highlight {
+            color: var(--success);
+            font-size: 1.1rem;
+        }
+        .eco-highlight {
+            color: var(--eco);
+        }
+        .print-btn {
+            width: 100%;
+            padding: 0.8rem;
+            margin-top: auto; /* Pushes button to bottom of the card */
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .print-btn:hover {
+            background-color: #d97706;
+        }
+
+        /* Responsive: Stacks to one column on smaller screens/tablets */
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            body {
+                align-items: flex-start;
+            }
+        }
+
+        /* PRINT STYLES */
+        @media print {
+            body { background-color: white; padding: 0; align-items: flex-start; }
+            .calculator-container { box-shadow: none; max-width: 100%; padding: 0; }
+            .print-btn, input[type="range"] { display: none !important; }
+            input[type="number"], input[type="text"] { border: none; padding: 0; font-weight: bold; color: var(--primary); font-size: 1.1rem; background: transparent; }
+            .results { border: 2px solid var(--text); background-color: white; height: auto; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="calculator-container">
+    <h2>☀️ Solar System Calculator</h2>
+
+    <div class="dashboard-grid">
+        
+        <div class="inputs-section">
+            <h3>Energy Requirements</h3>
+            
+            <div class="input-group">
+                <label for="rate">Electricity Rate (₱ per kWh)</label>
+                <input type="number" id="rate" value="13.01" step="0.01" oninput="calculateSolar()">
+            </div>
+
+            <div class="input-group">
+                <label for="bill">Current Monthly Bill (₱)</label>
+                <input type="text" id="bill" value="10,000" oninput="formatNumberInput(this); calculateSolar()">
+            </div>
+
+            <div class="input-group">
+                <label>Target Bill Reduction <span id="savings-val" class="slider-value">50%</span></label>
+                <input type="range" id="savings" min="10" max="100" value="50" oninput="updateSlider('savings', 'savings-val', '%'); calculateSolar()">
+            </div>
+
+            <div class="input-group">
+                <label>System Efficiency <span id="efficiency-val" class="slider-value">80%</span></label>
+                <input type="range" id="efficiency" min="70" max="95" value="80" oninput="updateSlider('efficiency', 'efficiency-val', '%'); calculateSolar()">
+            </div>
+
+            <h3 style="margin-top: 1.5rem;">Financials</h3>
+
+            <div class="input-group">
+                <label for="price-per-kwp">Estimated Price per kWp (₱)</label>
+                <input type="text" id="price-per-kwp" value="60,000" oninput="formatNumberInput(this); calculateSolar()">
+            </div>
+        </div>
+
+        <div class="results">
+            
+            <div class="hero-result">
+                <span class="label">Recommended System Size</span>
+                <span id="out-capacity" class="value">0.00 kWp</span>
+                <span id="out-panels" class="sub-value">(Approx. 0 panels using standard 550W modules)</span>
+            </div>
+
+            <div class="result-item">
+                <span>Required Roof Space:</span>
+                <span id="out-space" class="result-value">0 sqm</span>
+            </div>
+            <div class="result-item">
+                <span>Estimated Total Cost:</span>
+                <span id="out-cost" class="result-value">₱0</span>
+            </div>
+            <div class="result-item">
+                <span>Estimated Monthly Savings:</span>
+                <span id="out-monthly" class="result-value highlight">₱0</span>
+            </div>
+            <div class="result-item">
+                <span>Estimated Annual Savings:</span>
+                <span id="out-annual" class="result-value highlight">₱0</span>
+            </div>
+            <div class="result-item">
+                <span>ROI Period (Payback):</span>
+                <span id="out-roi" class="result-value">0 years</span>
+            </div>
+
+            <h3 class="eco-title">🌍 Environmental Impact</h3>
+            <div class="result-item">
+                <span>CO₂ Avoided Annually:</span>
+                <span id="out-co2" class="result-value eco-highlight">0 kg</span>
+            </div>
+            <div class="result-item" style="border-bottom: none; margin-bottom: 1rem;">
+                <span>Equivalent Trees Planted:</span>
+                <span id="out-trees" class="result-value eco-highlight">🌲 0 trees</span>
+            </div>
+
+            <button class="print-btn" onclick="window.print()">🖨️ Print / Save as PDF</button>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    function formatNumberInput(input) {
+        let val = input.value.replace(/[^\d.]/g, '');
+        const parts = val.split('.');
+        if (parts.length > 2) parts.pop();
+        if (parts[0]) parts[0] = parseInt(parts[0], 10).toLocaleString('en-US');
+        input.value = parts.join('.');
+    }
+
+    function updateSlider(inputId, spanId, suffix) {
+        const val = document.getElementById(inputId).value;
+        document.getElementById(spanId).innerText = val + suffix;
+    }
+
+    function calculateSolar() {
+        const rate = parseFloat(document.getElementById('rate').value) || 0;
+        
+        const rawBill = document.getElementById('bill').value.replace(/,/g, '');
+        const bill = parseFloat(rawBill) || 0;
+        
+        const savingsPct = parseFloat(document.getElementById('savings').value) || 0;
+        const efficiencyPct = parseFloat(document.getElementById('efficiency').value) || 0;
+        
+        const rawPricePerKwp = document.getElementById('price-per-kwp').value.replace(/,/g, '');
+        const pricePerKwp = parseFloat(rawPricePerKwp) || 0;
+
+        const monthlyPSH = 130; 
+        const assumedPanelWattage = 550;
+        const sqmPerKwp = 5.5; 
+        const co2PerKwh = 0.65; 
+        const kgPerTree = 22;   
+
+        if (rate <= 0 || bill <= 0) {
+            resetOutputs();
+            return; 
+        }
+
+        const monthlySavings = bill * (savingsPct / 100);
+        const annualSavings = monthlySavings * 12;
+        
+        const targetEnergyMonthlyKwh = monthlySavings / rate;
+        const targetEnergyAnnualKwh = targetEnergyMonthlyKwh * 12;
+
+        const capacityKwp = targetEnergyMonthlyKwh / (monthlyPSH * (efficiencyPct / 100));
+        
+        const numPanels = Math.ceil((capacityKwp * 1000) / assumedPanelWattage);
+        const roofSpace = capacityKwp * sqmPerKwp;
+        const systemCost = capacityKwp * pricePerKwp;
+
+        let roiYears = 0;
+        if (annualSavings > 0) {
+            roiYears = systemCost / annualSavings;
+        }
+
+        const annualCo2Avoided = targetEnergyAnnualKwh * co2PerKwh;
+        const treesPlanted = Math.round(annualCo2Avoided / kgPerTree);
+
+        document.getElementById('out-capacity').innerText = capacityKwp.toFixed(2) + ' kWp';
+        document.getElementById('out-panels').innerText = `(Approx. ${numPanels} panels using standard 550W modules)`;
+        document.getElementById('out-space').innerText = roofSpace.toFixed(1) + ' sq meters';
+        
+        const currencyFormat = {minimumFractionDigits: 0, maximumFractionDigits: 0};
+        document.getElementById('out-cost').innerText = '₱' + systemCost.toLocaleString('en-US', currencyFormat);
+        document.getElementById('out-monthly').innerText = '₱' + monthlySavings.toLocaleString('en-US', currencyFormat);
+        document.getElementById('out-annual').innerText = '₱' + annualSavings.toLocaleString('en-US', currencyFormat);
+        
+        document.getElementById('out-roi').innerText = roiYears > 0 ? roiYears.toFixed(2) + ' years' : 'N/A';
+
+        document.getElementById('out-co2').innerText = annualCo2Avoided.toLocaleString('en-US', {maximumFractionDigits: 0}) + ' kg';
+        document.getElementById('out-trees').innerText = '🌲 ' + treesPlanted.toLocaleString('en-US') + ' trees';
+    }
+
+    function resetOutputs() {
+        document.getElementById('out-capacity').innerText = "0.00 kWp";
+        document.getElementById('out-panels').innerText = "(Approx. 0 panels)";
+        document.getElementById('out-space').innerText = "0 sqm";
+        document.getElementById('out-cost').innerText = "₱0";
+        document.getElementById('out-monthly').innerText = "₱0";
+        document.getElementById('out-annual').innerText = "₱0";
+        document.getElementById('out-roi').innerText = "0 years";
+        document.getElementById('out-co2').innerText = "0 kg";
+        document.getElementById('out-trees').innerText = "🌲 0 trees";
+    }
+
+    calculateSolar();
+</script>
+
+</body>
+</html>
